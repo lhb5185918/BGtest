@@ -36,12 +36,12 @@ class RegisterView(forms.ModelForm):
 
 @csrf_exempt
 def register(request):
-    form = RegisterView()
+    form = RegisterView(request.POST)
     return render(request, 'app01/register.html', {"form": form})
 
 
 @csrf_exempt
 def get_sms(request):
     phone = request.POST.get('phone')
-    conn = get_redis_connection("default")#获取setting中默认的redis链接
+    # conn = get_redis_connection("default")#获取setting中默认的redis链接
     return HttpResponse('发送短信成功')
