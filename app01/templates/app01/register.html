@@ -10,6 +10,7 @@
             margin: 0 auto;
         }
     </style>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.js"></script>
 </head>
 <body>
 <div class="account">
@@ -21,7 +22,21 @@
                     <label for="{{ feild.id_for_label }}">{{ feild.label }}</label>
                     <div class="clearfix">
                         <div class="col-md-6" style="padding-left: 0">{{ feild }}</div>
-                        <div class="col-md-6"><input type="button" value="点击获取验证码" class="btn btn-default"></div>
+                        <div class="col-md-6"><input type="button" value="点击获取验证码" class="btn btn-default" onblur="sms()">
+                        <script>
+                            function sms(){
+                                $.ajax(
+                                    {
+                                        url: '/sms/',
+                                        type:'post',
+                                        data:{
+                                            phone: $('input[name="phone"]').val()
+                                        }
+                                    }
+                                )
+                            }
+                        </script>
+                        </div>
                     </div>
                 </div>
             {% else %}

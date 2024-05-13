@@ -2,13 +2,15 @@ from django.shortcuts import render, HttpResponse
 from django import forms
 from django.core.validators import RegexValidator
 from django.core.validators import ValidationError
-import redis
 from app01.models import UserInfo
+from django.views.decorators.csrf import csrf_exempt
+from django_redis import get_redis_connection
 
 
 # Create your views here.
 
 
+@csrf_exempt
 class RegisterView(forms.ModelForm):
     # 定义一个表单类
     phone = forms.CharField(max_length=11, min_length=11, required=True,
@@ -32,10 +34,14 @@ class RegisterView(forms.ModelForm):
             fields.widget.attrs['placeholder'] = '请输入{}'.format(fields.label)
 
 
+@csrf_exempt
 def register(request):
     form = RegisterView()
-    return render(request, 'register.html', {"form": form})
+    return render(request, 'app01/register.html', {"form": form})
 
 
-def get_sms(requests):
+@csrf_exempt
+def get_sms(request):
+    phone = request.POST.get('phone')
+    conn = get_redis_connection("default")#获取setting中默认的redis链接
     return HttpResponse('发送短信成功')
