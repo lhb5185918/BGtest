@@ -1,13 +1,59 @@
-{% extends '/layout/basic.html' %}
-{% block title %} 用户注册 {% endblock %}
-{% block cass %}
+{% extends 'layout/basic.html' %} {# 继承基础模板 #}
+{% load static %} {# 加载静态文件 #}
 
+{% block title %} 用户注册 {% endblock %} {# 设置页面标题为 "用户注册" #}
+
+
+{% block css %}
+    <link rel = stylesheet href = '{% static "/css/account.css" %}'> {# 加载 account.css 样式文件 #}
 
 {% endblock %}
 
 
 {% block content %}
-    <h3>用户注册</h3>
+    <div class="account">
+    <h1 style="text-align: center">注册</h1> {# 页面标题 #}
+    <form id = "form" method="post" novalidate> {# 注册表单，禁用浏览器自动验证 #}
+        {% for field in form %}  {# 遍历表单的所有字段 #}
+            {% if field.name == 'code' %} {# 如果字段名为 "code" #}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label> {# 这是一个 HTML label 元素，它的 for 属性与输入字段的 id 属性相对应，这样当用户点击标签时，浏览器会将焦点移动到对应的输入字段。{{ field.label }} 是 Django 模板语言的变量，它会被替换为当前字段的标签。 #}
+                    <div class="row">
+                        <div class="col-xs-7">
+                            {{ field }}
+                            <span class = "error-msg">{{ field.errors.0 }}</span> {# 显示字段的第一个错误消息 #}
+                        </div>
+                        <div class="col-xs-5">
+                            <input id = "smsBtn" type = "button" class = "btn btn-default" value="点击获取验证码"> {# 验证码获取按钮 #}
+                        <script>
+                            function sms(){
+                                $.ajax(
+                                    {
+                                        url: '/send_sms/', {# 发送 POST 请求到 /send_sms/ 路径 #}
+                                        type:'post',
+                                        data:{
+                                            phone: $('input[name="phone"]').val() {# 传递电话号码 #}
+                                        }
+                                    }
+                                )
+                            }
+                        </script>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    <span class = "error-msg">{{ field.errors.0 }}</span> {# 显示字段的第一个错误消息 #}
+                </div>
+            {% endif %}
+        {% endfor %}
+        <div class="form-group">
+            <input type="submit" class="btn btn-primary" value="注  册"/> {# 提交按钮 #}
+        </div>
+    </form>
+</div>
 {% endblock %}
 {% block js %}
 {% endblock %}
