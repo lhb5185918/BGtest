@@ -5,7 +5,7 @@ from django.db import models
 
 class UserInfo(models.Model):
     user_id = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=32, verbose_name='用户名')
+    username = models.CharField(max_length=32, verbose_name='用户名',db_index=True) #dc_index=True表示为该字段创建索引
     password = models.CharField(max_length=32, verbose_name='密码')
     email = models.CharField(max_length=32, verbose_name='邮箱')
     phone = models.CharField(max_length=32, verbose_name='电话')

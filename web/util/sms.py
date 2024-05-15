@@ -34,4 +34,3 @@ def send_sms(phone, sms_code, code):
         result = ["短信类型错误"]
 
     return result
-

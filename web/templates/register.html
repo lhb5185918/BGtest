@@ -7,6 +7,11 @@
 
 {% block css %}
     <link rel=stylesheet href='{% static "/css/account.css" %}'> {# 加载 account.css 样式文件 #}
+    <style>
+    .error-msg {
+            color: red;
+        }
+    </style> {# 自定义样式 #}
 
 {% endblock %}
 
@@ -14,7 +19,7 @@
 {% block content %}
     <div class="account">
         <h1 style="text-align: center">用户注册</h1> {# 页面标题 #}
-        <form id="form" method="post" novalidate> {# 注册表单，禁用浏览器自动验证 #}
+        <form id="regForm" method="post" novalidate> {# 注册表单，禁用浏览器自动验证 #}
             {% for field in form %}  {# 遍历表单的所有字段 #}
                 {% if field.name == 'code' %} {# 如果字段名为 "code" #}
                     <div class="form-group">
@@ -23,10 +28,10 @@
                         <div class="row">
                             <div class="col-xs-7">
                                 {{ field }}
-                                <span class="error-msg">{{ field.errors.0 }}</span> {# 显示字段的第一个错误消息 #}
+                                <span class="error-msg"></span> {# 显示字段的第一个错误消息 #}
                             </div>
                             <div class="col-xs-5">
-                                <input id="btnSms" type="button" class="btn btn-default" value="点击获取验证码"> {# 验证码获取按钮 #}
+                                <input id="btnSms" type="button" class="btn btn-default" value="点击获取验证码" > {# 验证码获取按钮 #}
                             </div>
                         </div>
                     </div>
@@ -34,12 +39,12 @@
                     <div class="form-group">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {{ field }}
-                        <span class="error-msg">{{ field.errors.0 }}</span> {# 显示字段的第一个错误消息 #}
+                        <span class="error-msg"></span> {# 显示字段的第一个错误消息 #}
                     </div>
                 {% endif %}
             {% endfor %}
             <div class="form-group">
-                <input type="submit" class="btn btn-primary" value="注  册"/> {# 提交按钮 #}
+                <input id = "btnSubmit" type="button" class="btn btn-primary" value="注  册"/> {# 提交按钮 #}
             </div>
         </form>
     </div>
@@ -52,14 +57,46 @@
     $(
         function (){
             btnClickBtnSendSms();
+            btnClickSubmit();
         }
     );
+        //点击提交按钮
+    function btnClickSubmit(){
+        $('#btnSubmit').click(function (){
+            //获取表单数据
+            //表单数据发送至后台
+            $.ajax({
+                url:"{% url 'register' %}",
+                type:"POST",
+                data:$('#regForm').serialize(), //序列化表单数据，包含表单中的所有字段数据
+                dataType: "JSON",
+                success: function(res){
+                    console.log(res)
+                }
+            })
+
+        })
+    }
+
+        //点击获取验证码按钮
     function btnClickBtnSendSms(){
-        $("#btnSms").click(
+        //点击获取验证码按钮
+        let btnSms = $("#btnSms");
+        let phoneInput = $("#id_phone");
+        btnSms.click(
             function (){
                 //获取手机号码
-                let phone = $("#id_phone").val();
-
+                let phone = phoneInput.val();
+                //判断手机号码是否为空
+                    if(phone===""){
+                    phoneInput.next('.error-msg').text('请输入手机号');
+                    return;
+                //判断手机号码是否合法
+                }
+                    else if (!(/^1[3456789]\d{9}$/.test(phone))){
+                    phoneInput.next('.error-msg').text('手机号格式错误');
+                    return;
+                }
                 //发送ajax请求，传手机号获取验证码
                 $.ajax(
                     {
@@ -67,14 +104,44 @@
                         //发送验证码的URL 与urls.py中的name对应，功能与/send_sms/一致
                         type:"post",
                         data:{phone:phone,sms_type:"register"},
+                        //传递手机号码和验证码类型
+                        dataType:"JSON",
+                        //反序列化返回的json数据
                         success:function (res){
                             //成功回调
-                            alert(res)
+                            if (res.status){
+                                sendSmsRemind();
+                            }
+                            else {
+                                console.log('发送失败');
+                            }
                         }
                     }
                 )
             }
         );
+        // 开始监听手机号输入框的输入时间
+        $('.form-control').on('input',function (){
+            //如果输入框有值
+            if ($(this).val()){
+                //清空错误提示
+                $(this).next('.error-msg').text('');
+            }
+        })
+    }
+        //倒计时功能
+    function sendSmsRemind(){
+        let btnSms = $('#btnSms');
+        btnSms.prop('disabled',true);
+        let time = 60;
+        let remind = setInterval(function (){
+            btnSms.val(time+'秒重新发送')
+            time = time - 1;
+            if (time <1){
+                clearInterval(remind);
+                btnSms.val('点击获取验证码').prop('disabled',false);
+            }
+        },1000)
     }
     </script>
 {% endblock %}
