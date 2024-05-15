@@ -7,6 +7,11 @@
 
 {% block css %}
     <link rel=stylesheet href='{% static "/css/account.css" %}'> {# 加载 account.css 样式文件 #}
+    <style>
+    .error-msg {
+            color: red;
+        }
+    </style> {# 自定义样式 #}
 
 {% endblock %}
 
@@ -67,9 +72,17 @@
                         //发送验证码的URL 与urls.py中的name对应，功能与/send_sms/一致
                         type:"post",
                         data:{phone:phone,sms_type:"register"},
+                        //传递手机号码和验证码类型
+                        dataType:"JSON",
+                        //反序列化返回的json数据
                         success:function (res){
                             //成功回调
-                            alert(res)
+                            if (res.status){
+                                console.log('发送成功 开始倒计时');
+                            }
+                            else {
+                                console.log('发送失败');
+                            }
                         }
                     }
                 )

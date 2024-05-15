@@ -11,15 +11,15 @@ from web.forms.account import SendSmsForm
 
 @csrf_exempt
 def register(request):
-    form = RegisterView(request.POST)
+    form = RegisterView()
     return render(request, "register.html", {"form": form})
 
 
 @csrf_exempt
 def send_sms(request):
     form = SendSmsForm(request, data=request.POST)  # 向SendSmsForm传递request对象，以便在form中获取到request对象
-    print(SendSmsForm(request, data=request.POST))
     if form.is_valid():  # 判断是否通过验证
         return JsonResponse({"status": True, "msg": "发送成功"})
-    return JsonResponse({"status": False, "msg": "发送失败{}".format(form.errors)})
+    for i in form.errors.values():
+        return JsonResponse({"status": False, "msg": i[0]})
 
