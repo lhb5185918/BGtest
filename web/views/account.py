@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect, HttpResponse
 from web.forms.account import RegisterView
 from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from web.forms.account import SendSmsForm
 
 """
     账户相关视图
@@ -10,12 +12,14 @@ from django.views.decorators.csrf import csrf_exempt
 @csrf_exempt
 def register(request):
     form = RegisterView(request.POST)
-    return render(request, "register.html",{"form": form})
+    return render(request, "register.html", {"form": form})
 
 
 @csrf_exempt
 def send_sms(request):
-    phone = request.POST.get("phone")
-    username = request.POST.get("username")
-    print(phone, username)
-    return HttpResponse("发送短信成功")
+    form = SendSmsForm(request, data=request.POST)  # 向SendSmsForm传递request对象，以便在form中获取到request对象
+    print(SendSmsForm(request, data=request.POST))
+    if form.is_valid():  # 判断是否通过验证
+        return JsonResponse({"status": True, "msg": "发送成功"})
+    return JsonResponse({"status": False, "msg": "发送失败{}".format(form.errors)})
+

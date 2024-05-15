@@ -49,17 +49,32 @@
 {% block js %}
     <script>
     //页面加载完毕后执行
-    $ (
+    $(
         function (){
-            bindClickBtnSms();
+            btnClickBtnSendSms();
+        }
+    );
+    function btnClickBtnSendSms(){
+        $("#btnSms").click(
+            function (){
+                //获取手机号码
+                let phone = $("#id_phone").val();
 
-
-
-
-
-
+                //发送ajax请求，传手机号获取验证码
+                $.ajax(
+                    {
+                        url:"{% url "send_sms" %}",
+                        //发送验证码的URL 与urls.py中的name对应，功能与/send_sms/一致
+                        type:"post",
+                        data:{phone:phone,sms_type:"register"},
+                        success:function (res){
+                            //成功回调
+                            alert(res)
+                        }
+                    }
+                )
             }
-
-
-
+        );
+    }
+    </script>
 {% endblock %}
