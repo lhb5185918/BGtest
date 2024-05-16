@@ -9,6 +9,7 @@ from web.util.sms import send_sms
 import random
 import json
 from web.util.encrypt import md5
+from web.forms.bootstrap import BootStrapForm
 
 
 # Create your views here.
@@ -37,7 +38,7 @@ class RegisterView(forms.ModelForm):
             fields.widget.attrs['class'] = 'form-control'
             fields.widget.attrs['placeholder'] = '请输入{}'.format(fields.label)
 
-    def clean_username(self): # 重写clean_username方法,创建一个自定义的验证规则
+    def clean_username(self):  # 重写clean_username方法,创建一个自定义的验证规则
         username = self.cleaned_data['username']
         exists = models.UserInfo.objects.filter(username=username).exists()
         if exists:
@@ -65,8 +66,7 @@ class RegisterView(forms.ModelForm):
         return phone
 
     def clean_code(self):
-        code = self.cleaned_data['code']
-        if 'phone'not in self.cleaned_data:
+        if 'phone' not in self.cleaned_data:
             raise ValidationError('手机号验证失败,请重新输入手机号')
         code = self.cleaned_data['code']
         phone = self.cleaned_data['phone']
@@ -95,8 +95,12 @@ class SendSmsForm(forms.Form):  # 用于验证表单
         phone = self.cleaned_data['phone']
         send_type = self.request.POST.get('sms_type')  # 调用request对象的POST方法获取send_type
         user_phone = models.UserInfo.objects.filter(phone=phone)
-        if user_phone:  # 判断手机号是否已经注册
-            raise ValidationError('手机号已经注册')
+        if send_type == 'login':
+            if not user_phone:
+                raise ValidationError('手机号未注册')
+        else:
+            if user_phone:  # 判断手机号是否已经注册
+                raise ValidationError('手机号已经注册')
         code = ''.join(random.sample('0123456789', 4))
         # res = send_sms(phone=phone, sms_code=send_type, code=code)  # 调用send_sms方法发送短信
         # if json.loads(res[0])['Message'] != "OK":
@@ -108,15 +112,33 @@ class SendSmsForm(forms.Form):  # 用于验证表单
 
 
 @csrf_exempt
-class LoginSmsForm(forms.Form):
-
+class LoginSmsForm(BootStrapForm, forms.Form):
     phone = forms.CharField(label='手机号',
                             validators=[RegexValidator(r'(1[3456789])\d{9}$', '手机号格式错误')])
     code = forms.CharField(max_length=4, min_length=4, required=True, label='验证码')
 
-    def __init__(self, request, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        for name, fields in self.fields.items():
-            fields.widget.attrs['class'] = 'form-control'
-            fields.widget.attrs['placeholder'] = '请输入{}'.format(fields.label)
+    def clean_phone(self):
+        phone = self.cleaned_data['phone']
+        user_object = models.UserInfo.objects.filter(phone=phone).first()
+        if not user_object:
+            raise ValidationError('手机号未注册')
+        return user_object
+
+    def clean_code(self):
+        code = self.cleaned_data['code']
+        if 'phone' not in self.cleaned_data:
+            raise ValidationError('手机号验证失败,请重新输入手机号')
+        code = self.cleaned_data['code']
+        user_object = self.cleaned_data['phone']
+        conn = get_redis_connection()
+        redis_code = conn.get(user_object.phone)
+
+        if not redis_code:
+            raise ValidationError('验证码已过期,请重新发送验证码')
+
+        str_code = redis_code.decode('utf-8')
+
+        if code.strip() != str_code:
+            raise ValidationError('验证码错误,请重新输入')
+
 
