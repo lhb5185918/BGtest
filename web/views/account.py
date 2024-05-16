@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, HttpResponse
 from web.forms.account import RegisterView
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from web.forms.account import SendSmsForm
+from web.forms.account import SendSmsForm, LoginSmsForm
 
 
 """
@@ -19,12 +19,12 @@ def register(request):
         forms = RegisterView(request,data=request.POST)
         if forms.is_valid():
             #获取表单内容，清洗后写入数据库，密码加密
-            instance = forms.save()
-            print(forms.cleaned_data)
-            return JsonResponse({"status": True, "msg": "注册成功"})
+            forms.save()
+            return JsonResponse({"status": True, "msg": "注册成功", "data": "/login/sms/"})
         else:
-            print(forms.errors)
-            return JsonResponse({"status": False, "msg": "注册失败{}".format(forms.errors)})
+            for i in forms.errors.values():
+                return JsonResponse({"status": False, "msg": i[0]})
+
 
 
 @csrf_exempt
@@ -36,3 +36,8 @@ def send_sms(request):
     for i in form.errors.values():
         return JsonResponse({"status": False, "msg": i[0]})
 
+
+@csrf_exempt
+def login_sms(request):
+    forms = LoginSmsForm({})
+    return render(request, "login_sms.html", {"form": forms})

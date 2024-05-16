@@ -50,7 +50,6 @@ class RegisterView(forms.ModelForm):
 
         return md5(pwd)
 
-
     def clean_confirm_password(self):
         pwd = self.cleaned_data['password']
         confirm_pwd = self.cleaned_data['confirm_password']
@@ -67,10 +66,13 @@ class RegisterView(forms.ModelForm):
 
     def clean_code(self):
         code = self.cleaned_data['code']
+        if 'phone'not in self.cleaned_data:
+            raise ValidationError('手机号验证失败,请重新输入手机号')
+        code = self.cleaned_data['code']
         phone = self.cleaned_data['phone']
-
         conn = get_redis_connection()
         redis_code = conn.get(phone)
+
         if not redis_code:
             raise ValidationError('验证码已过期,请重新发送验证码')
 
@@ -78,10 +80,6 @@ class RegisterView(forms.ModelForm):
 
         if code.strip() != str_code:
             raise ValidationError('验证码错误,请重新输入')
-
-
-
-
 
 
 @csrf_exempt
@@ -107,3 +105,18 @@ class SendSmsForm(forms.Form):  # 用于验证表单
         conn = get_redis_connection()
         conn.set(phone, code, ex=60)  # 将验证码存入redis，有效期60秒
         return phone
+
+
+@csrf_exempt
+class LoginSmsForm(forms.Form):
+
+    phone = forms.CharField(label='手机号',
+                            validators=[RegexValidator(r'(1[3456789])\d{9}$', '手机号格式错误')])
+    code = forms.CharField(max_length=4, min_length=4, required=True, label='验证码')
+
+    def __init__(self, request, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, fields in self.fields.items():
+            fields.widget.attrs['class'] = 'form-control'
+            fields.widget.attrs['placeholder'] = '请输入{}'.format(fields.label)
+
