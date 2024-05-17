@@ -2,7 +2,10 @@ from django.shortcuts import render, redirect, HttpResponse
 from web.forms.account import RegisterView
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from web.forms.account import SendSmsForm, LoginSmsForm
+from web.forms.account import SendSmsForm, LoginSmsForm, LoginForm
+from web.models import UserInfo
+from web.util.image_code import check_code
+from django.db.models import Q
 
 """
     账户相关视图
@@ -27,7 +30,8 @@ def register(request):
 
 @csrf_exempt
 def send_sms(request):
-    form = SendSmsForm(request, data=request.POST)  # 向SendSmsForm传递request对象，以便在form中获取到request对象
+    form = SendSmsForm(request, data=request.POST)
+    # 向SendSmsForm传递request对象，以便在form中获取到request对象
     print(request.POST.get('sms_type'), request.POST.get('phone'))
     if form.is_valid():  # 判断是否通过验证
         return JsonResponse({"status": True, "msg": "短信发送成功"})
@@ -40,10 +44,61 @@ def login_sms(request):
     if request.method == 'POST':
         forms = LoginSmsForm(request, data=request.POST)
         if forms.is_valid():
-            userinfo = forms.cleaned_data.get('phone')
-            return JsonResponse({"status": True, "msg": "登录成功{}", "data": "/index/".format(userinfo.username)})
+            userinfo = UserInfo.objects.filter(phone=forms.cleaned_data.get('phone')).first()
+            request.session['user_id'] = userinfo.user_id
+            request.session.set_expiry(60 * 60 * 24 * 14)
+            return JsonResponse({"status": True, "msg": "登录成功{}".format(userinfo.username), "data": "/index/"})
         for i in forms.errors.values():
             return JsonResponse({"status": False, "msg": i[0]})
     else:
         forms = LoginSmsForm({})
     return render(request, "login_sms.html", {"form": forms})
+
+
+@csrf_exempt
+def login(request):
+    if request.method == "GET":
+        forms = LoginForm(request, {})
+        return render(request, "login.html", {"form": forms})
+    else:
+        forms = LoginForm(request, data=request.POST)
+        if forms.is_valid():
+            username = forms.cleaned_data.get('username')
+            password = forms.cleaned_data.get('password')
+            # user = UserInfo.objects.filter(username=username, password=password).first()
+            user_object = UserInfo.objects.filter(Q(email=username) |
+                                                  Q(phone=username)).filter(password=password).first()
+            # 通过Q对象实现或查询表达的是或的关系
+            if user_object:
+                #  登录成功后，将用户id存入session
+                request.session['user_id'] = user_object.user_id
+                request.session.set_expiry(60 * 60 * 24 * 14)
+                return redirect("/index/")
+            forms.add_error("username", "用户名或密码错误")
+        for i in forms.errors.values():
+            return JsonResponse({"status": False, "msg": i[0]})
+    return render(request, "login.html", {"form": forms})
+
+
+@csrf_exempt
+def img_code(request):
+    from io import BytesIO
+    # 调用 check_code 函数生成验证码图片对象和验证码字符串
+    image_object, code = check_code()
+    # 将验证码字符串存入 session，以便后续验证用户输入的验证码是否正确
+    request.session['code'] = code
+    # 设置验证码图片的过期时间
+    request.session.set_expiry(60)
+    # 创建一个 BytesIO 对象，用于在内存中存储图片数据
+    stream = BytesIO()
+    image_object.save(stream, 'png')
+    stream.getvalue()
+
+    return HttpResponse(stream.getvalue())
+
+
+@csrf_exempt
+def logout(request):
+    # 退出登录，清除session
+    request.session.flush()
+    return redirect("/index/")

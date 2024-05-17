@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render, HttpResponse
 from web import models
 from django import forms
@@ -119,19 +120,19 @@ class LoginSmsForm(BootStrapForm, forms.Form):
 
     def clean_phone(self):
         phone = self.cleaned_data['phone']
-        user_object = models.UserInfo.objects.filter(phone=phone).first()
+        user_object = models.UserInfo.objects.exists()
         if not user_object:
             raise ValidationError('手机号未注册')
-        return user_object
+        return phone
 
     def clean_code(self):
         code = self.cleaned_data['code']
         if 'phone' not in self.cleaned_data:
             raise ValidationError('手机号验证失败,请重新输入手机号')
         code = self.cleaned_data['code']
-        user_object = self.cleaned_data['phone']
+        phone = self.cleaned_data['phone']
         conn = get_redis_connection()
-        redis_code = conn.get(user_object.phone)
+        redis_code = conn.get(phone)
 
         if not redis_code:
             raise ValidationError('验证码已过期,请重新发送验证码')
@@ -142,3 +143,30 @@ class LoginSmsForm(BootStrapForm, forms.Form):
             raise ValidationError('验证码错误,请重新输入')
 
 
+@csrf_exempt
+class LoginForm(BootStrapForm, forms.Form):
+    username = forms.CharField(label='邮箱或手机号')
+    password = forms.CharField(widget=forms.PasswordInput(), max_length=32, min_length=6, required=True, label='密码')
+    code = forms.CharField(label='图片验证码')
+
+    def __init__(self, request, *args, **kwargs):
+        super().__init__(request,*args, **kwargs)
+        self.cleaned = None
+        self.request = request
+
+    def clean_code(self):
+        code = self.cleaned_data['code']
+        # 获取用户输入的验证码
+        session_code = self.request.session.get('code')
+        print(session_code, code)
+
+        if not session_code:
+            raise ValidationError('验证码已过期')
+
+        if code.strip().upper() != session_code.upper():
+            raise ValidationError('验证码输入错误')
+        return code
+
+    def clean_password(self):
+        pwd = self.cleaned_data['password']
+        return md5(pwd)

@@ -1,0 +1,135 @@
+{% extends 'layout/basic.html' %} {# 继承基础模板 #}
+{% load static %} {# 加载静态文件 #}
+
+{% block title %} 用户登录 {% endblock %} {# 设置页面标题为 "用户注册" #}
+
+
+{% block css %}
+    <link rel=stylesheet href='{% static "/css/account.css" %}'> {# 加载 account.css 样式文件 #}
+    <style>
+        .error-msg {
+            color: red;
+        }
+
+        .toast-top-right {
+            top: 5% !important;
+            right: 50% !important;
+            transform: translate(50%, -50%);
+        }
+
+    </style> {# 自定义样式 #}
+
+{% endblock %}
+
+
+{% block content %}
+    <div class="account">
+        <h1 style="text-align: center">用户登录</h1> {# 页面标题 #}
+        <form id="loginSmsForm" method="post" novalidate> {# 注册表单，禁用浏览器自动验证 #}
+            {% for field in form %}  {# 遍历表单的所有字段 #}
+                {% if field.name == 'code' %} {# 如果字段名为 "code" #}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {# 这是一个 HTML label 元素，它的 for 属性与输入字段的 id 属性相对应，这样当用户点击标签时，浏览器会将焦点移动到对应的输入字段。{{ field.label }} 是 Django 模板语言的变量，它会被替换为当前字段的标签。 #}
+                        <div class="row">
+                            <div class="col-xs-7">
+                                {{ field }}
+                                <span class="error-msg"></span> {# 显示字段的第一个错误消息 #}
+                            </div>
+                            <div class="col-xs-5">
+                                <img src="{% url "img_code" %}" id="imgCode" title="点击更换图片">
+                                {# 验证码获取按钮 #}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        <span class="error-msg"></span> {# 显示字段的第一个错误消息 #}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            <div style="float: right;">
+                <a href="{% url "login_sms" %}">短信验证码登录</a>
+                {# 验证码获取按钮 #}
+            </div>
+            <div class="form-group">
+                <input id="btnSubmit" type="button" class="btn btn-primary" value="登  录"/> {# 提交按钮 #}
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+
+{% block js %}
+    <script>
+        $(document).ready(function () {
+            // 点击更换图片验证码
+            $('#imgCode').click(function () {
+                let oldSrc = $(this).attr('src')
+                $(this).attr('src', oldSrc + '?') // 加一个随机参数，防止浏览器缓存, 重新加载验证码
+            })
+
+            // 调用表单提交函数
+            btnClickSubmit();
+        });
+
+        // 表单提交
+        function btnClickSubmit() {
+            //点击提交按钮
+            $('#btnSubmit').click(function () {
+                let codeInput = $('#id_code');
+                let userInput = $('#id_username');
+                let passwordInput = $('#id_password');
+
+                // 用户名校验
+                if (userInput.val() === '') {
+                    userInput.next().text('邮箱或手机号不能为空');
+                    return;
+                } else if (userInput.length > 30) {
+                    userInput.next().text('用户名不能超过20个字符');
+                    return;
+                } else {
+                    userInput.next().text('');
+                }
+
+                // 密码校验
+                if (passwordInput.val() === '') {
+                    passwordInput.next().text('密码不能为空');
+                    return;
+                } else if (passwordInput.val().length < 6) {
+                    passwordInput.next().text('密码长度不能小于6');
+                    return;
+                } else {
+                    passwordInput.next().text('');
+                }
+
+                // 验证码校验
+                if (codeInput.val() === '') {
+                    codeInput.next().text('验证码不能为空');
+                    return;
+                } else if (codeInput.val().length !== 5) {
+                    codeInput.next().text('验证码长度为4');
+                    return;
+                } else {
+                    codeInput.next().text('');
+                }
+
+                //提交表单
+                $('#loginSmsForm').submit();
+            })
+
+            $('.form-control').on('input', function () {
+                //如果输入框有值
+                if ($(this).val()) {
+                    //清空错误提示
+                    $(this).next('.error-msg').text('');
+                }
+            })
+        }
+    </script>
+
+
+
+{% endblock %}
