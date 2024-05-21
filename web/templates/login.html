@@ -110,14 +110,28 @@
                     codeInput.next().text('验证码不能为空');
                     return;
                 } else if (codeInput.val().length !== 5) {
-                    codeInput.next().text('验证码长度为4');
+                    codeInput.next().text('验证码长度不为5');
                     return;
                 } else {
                     codeInput.next().text('');
                 }
+                // 发送ajax请求
+                $.ajax(
+                {
+                    url: "{% url "login" %}",
+                    type: "POST",
+                    data: $('#loginSmsForm').serialize(),
+                    dataType : "JSON",
+                    success: function (res){
+                        if (res.status){
+                            window.location.href = res.data;
+                        } else {
+                            toastr.error(res.msg);
+                        }
+                    }
+                }
+            )
 
-                //提交表单
-                $('#loginSmsForm').submit();
             })
 
             $('.form-control').on('input', function () {

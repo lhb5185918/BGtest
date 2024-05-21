@@ -3,9 +3,11 @@ from web.forms.account import RegisterView
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from web.forms.account import SendSmsForm, LoginSmsForm, LoginForm
-from web.models import UserInfo
+from web.models import UserInfo, PricePolicy ,Transaction , Project, ProjectUser
 from web.util.image_code import check_code
 from django.db.models import Q
+import uuid
+import datetime
 
 """
     账户相关视图
@@ -21,8 +23,12 @@ def register(request):
         forms = RegisterView(request, data=request.POST)
         if forms.is_valid():
             # 获取表单内容，清洗后写入数据库，密码加密
-            forms.save()
-            return JsonResponse({"status": True, "msg": "注册成功", "data": "/login/sms/"})
+            # 创建交易记录
+            instance = forms.save()
+            price = PricePolicy.objects.get(category=1, title='个人免费版')
+            Transaction.objects.create(status=2, order=str(uuid.uuid4()), user=instance, price_policy=price,
+                                       count=0, price=0, start_datetime=datetime.datetime.now())
+            return JsonResponse({"status": True, "msg": "注册成功", "data": "/index/"})
         else:
             for i in forms.errors.values():
                 return JsonResponse({"status": False, "msg": i[0]})
@@ -73,7 +79,7 @@ def login(request):
                 #  登录成功后，将用户id存入session
                 request.session['user_id'] = user_object.user_id
                 request.session.set_expiry(60 * 60 * 24 * 14)
-                return redirect("/index/")
+                return JsonResponse({"status": True, "msg": "登录成功", "data": "/index/"})
             forms.add_error("username", "用户名或密码错误")
         for i in forms.errors.values():
             return JsonResponse({"status": False, "msg": i[0]})
