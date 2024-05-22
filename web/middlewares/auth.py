@@ -1,6 +1,8 @@
 from django.utils.deprecation import MiddlewareMixin
-from web.models import UserInfo
-
+from web.models import UserInfo, Transaction, PricePolicy
+from django.shortcuts import redirect
+from django.conf import settings
+import datetime
 
 class AuthMiddleware(MiddlewareMixin):
     # 自定义中间件，用于获取用户对象
@@ -13,5 +15,30 @@ class AuthMiddleware(MiddlewareMixin):
         # 通过用户id获取用户对象
         request.tracer = user_object
         # 将用户对象赋值给request.tracer
+        # 防止死循环，设置登录白名单，在setting中设置
+        # 获取当前用户访问的url
+        # 如果访问的url在白名单中，那么就不进行拦截
+        whit_url = settings.LOGIN_WHITE_URL_LIST
+        reurl = request.path_info
+        if reurl in whit_url:
+            return
+        # 检查用户是否已经登录
+        # 如果已经登录，那么request.user就是用户对象
+        # 如果未登录，那么request.user就是AnonymousUser对象
+        if not request.tracer:
+            return redirect('/login/')
+
+        # 登录成功后访后台管理时获取用户额度
+        # 获取用户额度
+        _object = Transaction.objects.filter(user = user_object,status=2).order_by('-id').first()
+        # 判断是否已过期
+        current_datetime = datetime.datetime.now()
+        if _object.end_datetime and _object.end_datetime < current_datetime:
+            # 如果已过期，获取免费额度
+            _object = Transaction.objects.filter(user=user_object, status=2, price_policy__category=1).first()
+        request.transaction = _object
+
+
+
 
 

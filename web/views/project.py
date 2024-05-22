@@ -9,4 +9,7 @@ from django.db.models import Q
 
 
 def project_list(request):
+    # request.transaction.user
+    print(request.transaction.user)
+    print(request.transaction.price_policy.title)
     return render(request,'project_list.html')

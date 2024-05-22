@@ -161,3 +161,13 @@ LOGGING = {
         },
     }
 }
+
+# 登录白名单
+LOGIN_WHITE_URL_LIST = [
+    '/login/',
+    '/login_sms/',
+    '/register/',
+    '/send/sms/',
+    '/index/',
+    '/img/code/',
+]
