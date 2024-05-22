@@ -170,4 +170,5 @@ LOGIN_WHITE_URL_LIST = [
     '/send/sms/',
     '/index/',
     '/img/code/',
+    '/send_sms/',
 ]

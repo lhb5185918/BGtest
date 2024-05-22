@@ -28,7 +28,7 @@ def register(request):
             price = PricePolicy.objects.get(category=1, title='个人免费版')
             Transaction.objects.create(status=2, order=str(uuid.uuid4()), user=instance, price_policy=price,
                                        count=0, price=0, start_datetime=datetime.datetime.now())
-            return JsonResponse({"status": True, "msg": "注册成功", "data": "/index/"})
+            return JsonResponse({"status": True, "msg": "注册成功", "data": "/login/"})
         else:
             for i in forms.errors.values():
                 return JsonResponse({"status": False, "msg": i[0]})

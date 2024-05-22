@@ -186,6 +186,7 @@
                                 //成功回调
                                 if (res.status) {
                                     sendSmsRemind();
+                                    toastr.success("验证码发送成功")
                                 } else {
                                     toastr.error(res.msg);
                                 }
