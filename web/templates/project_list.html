@@ -5,13 +5,72 @@
             margin-top: 10px;
 
         }
+
+        .container-fluid.project {
+    margin-bottom: 20px; /* 在 "新建项目" 下方添加 20px 的边距 */
+}
+
         .error-msg {
             color: red;
         }
+
+         .panel-body {
+            padding: 0;
+            display: flex;
+            flex-direction: row;
+            justify-content: left;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+
         .toast-top-right {
             top: 10% !important;
             right: 50% !important;
             transform: translate(50%, -50%);
+        }
+ .panel-body > .item {
+            border-radius: 6px;
+            width: 228px;
+            border: 1px solid #dddddd;
+            margin: 20px 10px;
+
+        }
+
+        .panel-body > .item:hover {
+            border: 1px solid #f0ad4e;
+        }
+
+        .panel-body > .item > .title {
+            height: 104px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            font-size: 15px;
+            text-decoration: none;
+        }
+
+        .panel-body > .item > .info {
+            padding: 10px 10px;
+
+            display: flex;
+            justify-content: space-between;
+
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            color: #8c8c8c;
+
+        }
+
+        .panel-body > .item > .info a {
+            text-decoration: none;
+        }
+
+        .panel-body > .item > .info .fa-star {
+            font-size: 18px;
         }
     </style>
 {% endblock %}
@@ -20,11 +79,83 @@
 
 
 {% block content %}
-    <div class="container-fluid project">
+        <div class="container-fluid project">
 
         <a class='btn btn-primary' data-toggle="modal" data-target="#addModel"><i class="fa fa-arrows"
                                                                                   aria-hidden="true"/></i> 新建项目</a>
 
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><i class="fa fa-star" aria-hidden="true" style="background-color: chocolate"></i> 重点项目</div>
+        <div class="panel-body">
+            {% for item in project_dict.star %}
+                <div class="item">
+                    <a href="#" class="title"
+                       style="background-color: {{ item.value.get_color_display }};">{{ item.value.name }}</a>
+                    <div class="info">
+                        <div>
+                            <a href="{% url "project_unstar" item.type item.value.id %}">
+                                <i class="fa fa-star" aria-hidden="true" style="color: #f28033"></i>
+                            </a>
+                            <span>{{ item.value.creator.username }}</span>
+                        </div>
+                        <div>
+                            <i class="fa fa-user-o" aria-hidden="true"></i>
+                            <span>{{ item.value.join_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><i class="fa fa-list" aria-hidden="true"></i> 我创建的</div>
+        <div class="panel-body">
+            {% for item in project_dict.my %}
+                <div class="item">
+                    <a href="#" class="title"
+                       style="background-color: {{ item.get_color_display }};">{{ item.name }}</a>
+                    <div class="info">
+                        <div>
+                            <a href="{% url 'project_star' 'my' item.id %}">
+                                <i class="fa fa-star" aria-hidden="true" style="color: #d5d5d5"></i>
+                            </a>
+                            <span>{{ item.creator.username }}</span>
+                        </div>
+                        <div>
+                            <i class="fa fa-user-o" aria-hidden="true"></i>
+                            <span>{{ item.join_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading"><i class="fa fa-hand-paper-o" aria-hidden="true"></i> 我参与的项目</div>
+        <div class="panel-body">
+            {% for item in project_dict.join %}
+                <div class="item">
+                <a href="" class="title" style="background-color: {{ item.get_color_display }}">{{ item.name }}</a>
+                <div class="info">
+                    <div>
+                        <a href="{% url 'project_star' 'join' item.id %}">
+                            <i class="fa fa-star" aria-hidden="true"></i>
+                        </a>
+                        <span>{{ item.creator.username }}</span>
+                    </div>
+                    <div>
+                        <span>{{ item.join_count }}</span>
+                    </div>
+
+                </div>
+            {% endfor %}
+            </div>
+        </div>
     </div>
 
 
@@ -40,17 +171,17 @@
                 <div class="modal-body">
                     <form id="addForm">
                         {% for field in form %}
-                        <div class="form-group">
-                            <label for="{{ field.id_for_label }}">{{ field.label}}</label>
-                        {{ field }}
-                        <span class = "error-msg"></span>
-                        </div>
+                            <div class="form-group">
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                <span class="error-msg"></span>
+                            </div>
                         {% endfor %}
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">取 消</button>
-                    <button id = "btnSubmit" type="button" class="btn btn-primary">确 定</button>
+                    <button id="btnSubmit" type="button" class="btn btn-primary">确 定</button>
                 </div>
             </div>
         </div>
@@ -64,32 +195,32 @@
 {% block js %}
 
     <script>
-    $(function (){
-        bindSubmit();
-    });
+        $(function () {
+            bindSubmit();
+        });
 
-    function bindSubmit(){
-        $("#btnSubmit").click(function (){
-            $.ajax({
-                url: "{% url 'project_list' %}",
-                type: "POST",
-                data: $("#addForm").serialize(),
-                dataType: "JSON",
-                success: function (res){
-                    console.log(res);
-                    if(res.status){
-                        location.reload(); //刷新页面
+        function bindSubmit() {
+            $("#btnSubmit").click(function () {
+                $.ajax({
+                    url: "{% url 'project_list' %}",
+                    type: "POST",
+                    data: $("#addForm").serialize(),
+                    dataType: "JSON",
+                    success: function (res) {
+                        console.log(res);
+                        if (res.status) {
+                            location.reload(); //
+                        } else {
+                            toastr.error(res.msg);
+                        }
                     }
-                    else{
-                        toastr.error(res.msg);
-                    }
-                }
+                })
             })
-        })
-    }
+        }
 
 
     </script>
 
 
-    {% endblock %}
+{% endblock %}
+

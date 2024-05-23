@@ -10,4 +10,7 @@ urlpatterns = [
     path('index/', home.index, name='index'),
     path('logout/', account.logout, name='logout'),
     path('project/list/', project.project_list, name='project_list'),
+    path('project/star/(?p<project_type>\w+)/(?p<project_id>\d+)/$', project.project_star, name='project_star'),
+    path('project/unstar/(?p<project_type>\w+)/(?p<project_id>\d+)/$', project.project_unstar, name='project_unstar'),
+
 ]
