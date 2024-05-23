@@ -1,16 +1,19 @@
 from django import forms
 from web.forms.bootstrap import BootStrapForm
 from web import models
+from web.forms.widgets import ColorRadioSelect
 
 
 class ProjectModelForm(BootStrapForm, forms.ModelForm):
+    bootstrap_class_exclude = ['color']
     # desc = forms.CharField(widget=forms.Textarea(), label='描述', required=False)
     class Meta:
         # 重写Meta类，定义表单字段
         model = models.Project
         fields = ['name', 'color', 'desc']
         widgets = {
-            'desc': forms.Textarea()
+            'desc': forms.Textarea(),
+            'color': ColorRadioSelect  # 修改默认的展示方式
         }
 
     def __init__(self, request, *args, **kwargs):
