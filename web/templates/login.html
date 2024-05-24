@@ -17,6 +17,9 @@
             transform: translate(50%, -50%);
         }
 
+        #btnSubmit, #btnForget {
+            margin: 0 10px;
+        }
     </style> {# 自定义样式 #}
 
 {% endblock %}
@@ -56,6 +59,8 @@
             </div>
             <div class="form-group">
                 <input id="btnSubmit" type="button" class="btn btn-primary" value="登  录"/> {# 提交按钮 #}
+                <a id="btnForget" type="button" class="btn btn-primary" href=" {% url "forget_password" %}">忘记密码</a>
+                    {# 忘记密码 #}
             </div>
         </form>
     </div>
@@ -117,20 +122,20 @@
                 }
                 // 发送ajax请求
                 $.ajax(
-                {
-                    url: "{% url "login" %}",
-                    type: "POST",
-                    data: $('#loginSmsForm').serialize(),
-                    dataType : "JSON",
-                    success: function (res){
-                        if (res.status){
-                            window.location.href = res.data;
-                        } else {
-                            toastr.error(res.msg);
+                    {
+                        url: "{% url "login" %}",
+                        type: "POST",
+                        data: $('#loginSmsForm').serialize(),
+                        dataType: "JSON",
+                        success: function (res) {
+                            if (res.status) {
+                                window.location.href = res.data;
+                            } else {
+                                toastr.error(res.msg);
+                            }
                         }
                     }
-                }
-            )
+                )
 
             })
 

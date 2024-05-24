@@ -72,6 +72,28 @@
         .panel-body > .item > .info .fa-star {
             font-size: 18px;
         }
+
+        .color-radio label {
+            margin-left: 0;
+            padding-left: 0;
+        }
+
+        .color-radio input[type= "radio"] {
+            opacity: 0;
+            display: none;
+        }
+
+        .color-radio input[type= "radio"] + .cycle {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border:2px #dddddd;
+        }
+
+        .color-radio input[type= "radio"]:checked + .cycle {
+            border: 2px solid black;
+        }
     </style>
 {% endblock %}
 

@@ -150,7 +150,7 @@ class LoginForm(BootStrapForm, forms.Form):
     code = forms.CharField(label='图片验证码')
 
     def __init__(self, request, *args, **kwargs):
-        super().__init__(request,*args, **kwargs)
+        super().__init__(request, *args, **kwargs)
         self.cleaned = None
         self.request = request
 
@@ -170,3 +170,61 @@ class LoginForm(BootStrapForm, forms.Form):
     def clean_password(self):
         pwd = self.cleaned_data['password']
         return md5(pwd)
+
+
+@csrf_exempt
+class ForgetPasswordForm(BootStrapForm, forms.Form):
+    username = forms.CharField(label='邮箱或手机号')
+    new_password = forms.CharField(widget=forms.PasswordInput(), max_length=32, min_length=6, required=True,
+                                   label='新密码')
+    confirm_password = forms.CharField(widget=forms.PasswordInput(), max_length=32, min_length=6, required=True,
+                                       label='确认密码')
+    phone = forms.CharField(label='手机号',max_length=11, min_length=11, required=True)
+    code = forms.CharField(max_length=4, min_length=4, required=True, label='手机验证码')
+
+    def __init__(self, request, *args, **kwargs):
+        super().__init__(request, *args, **kwargs)
+        self.request = request
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        exists = models.UserInfo.objects.filter(email=username).exists() or models.UserInfo.objects.filter(
+            phone=username).exists()
+        if not exists:
+            raise ValidationError('用户未注册')
+        return username
+
+    def clean_new_password(self):
+        pwd = self.cleaned_data['new_password']
+        return md5(pwd)
+
+    def clean_confirm_password(self):
+        pwd = self.cleaned_data['new_password']
+        confirm_pwd = self.cleaned_data['confirm_password']
+        if pwd != md5(confirm_pwd):
+            raise ValidationError('两次密码不一致')
+        return confirm_pwd
+
+    def clean_phone(self):
+        phone = self.cleaned_data['phone']
+        exists = models.UserInfo.objects.filter(phone=phone).exists()
+        if not exists:
+            raise ValidationError('手机号未注册')
+        return phone
+
+    def clean_code(self):
+        if 'phone' not in self.cleaned_data:
+            raise ValidationError('手机号验证失败,请重新输入手机号')
+        code = self.cleaned_data['code']
+        phone = self.cleaned_data['phone']
+        conn = get_redis_connection()
+        redis_code = conn.get(phone)
+
+        if not redis_code:
+            raise ValidationError('验证码已过期,请重新发送验证码')
+
+        str_code = redis_code.decode('utf-8')
+
+        if code.strip() != str_code:
+            raise ValidationError('验证码错误,请重新输入')
+

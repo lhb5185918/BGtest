@@ -13,7 +13,7 @@ class ProjectModelForm(BootStrapForm, forms.ModelForm):
         fields = ['name', 'color', 'desc']
         widgets = {
             'desc': forms.Textarea(),
-            'color': ColorRadioSelect  # 修改默认的展示方式
+            'color': ColorRadioSelect(attrs={"class": "color-radio"})  # 修改默认的展示方式,使用自定义的RadioSelect
         }
 
     def __init__(self, request, *args, **kwargs):
