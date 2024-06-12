@@ -12,22 +12,22 @@ from web.models import Project, ProjectUser
 
 @csrf_exempt
 def project_list(request):
-    if request.method =="GET":
+    if request.method == "GET":
         project_dict = {"star": [], "my": [], "join": []}
         my_project = Project.objects.filter(creator=request.transaction.user)  # 获取当前用户的项目
         for row in my_project:
             if row.star:
-                project_dict['star'].append({"value":row,"type":"my"})
+                project_dict['star'].append({"value": row, "type": "my"})
             else:
                 project_dict['my'].append(row)
         join_project = ProjectUser.objects.filter(user=request.transaction.user)  # 获取当前用户参与的项目
         for item in join_project:
             if item.star:
-                project_dict['star'].append({"value":item.project,"type":"join"})
+                project_dict['star'].append({"value": item.project, "type": "join"})
             else:
                 project_dict['join'].append(item.project)
         forms = ProjectModelForm({})
-        return render(request, 'project_list.html', {"form": forms,"project_dict": project_dict})
+        return render(request, 'project_list.html', {"form": forms, "project_dict": project_dict})
     else:
         forms = ProjectModelForm(request, data=request.POST)
         if forms.is_valid():
@@ -42,7 +42,7 @@ def project_list(request):
 @csrf_exempt
 def project_star(request, project_type, project_id):
     if project_type == 'my':
-        Project.objects.filter(id =project_id, creator=request.transaction.user).update(star=True)
+        Project.objects.filter(id=project_id, creator=request.transaction.user).update(star=True)
         return redirect('project_list')
     elif project_type == 'join':
         ProjectUser.objects.filter(project_id=project_id, user=request.transaction.user).update(star=True)
@@ -51,10 +51,9 @@ def project_star(request, project_type, project_id):
 
 @csrf_exempt
 def project_unstar(request, project_type, project_id):
-
     if project_type == 'my':
         Project.objects.filter(id=project_id, creator=request.transaction.user).update(star=False)
         return redirect('project_list')
     elif project_type == 'join':
-        ProjectUser.objects.filter(project_id=project_id, user = request.transaction.user).update(star=False)
+        ProjectUser.objects.filter(project_id=project_id, user=request.transaction.user).update(star=False)
     return JsonResponse("ok", safe=False)

@@ -179,7 +179,7 @@ class ForgetPasswordForm(BootStrapForm, forms.Form):
                                    label='新密码')
     confirm_password = forms.CharField(widget=forms.PasswordInput(), max_length=32, min_length=6, required=True,
                                        label='确认密码')
-    phone = forms.CharField(label='手机号',max_length=11, min_length=11, required=True)
+    phone = forms.CharField(label='手机号', max_length=11, min_length=11, required=True)
     code = forms.CharField(max_length=4, min_length=4, required=True, label='手机验证码')
 
     def __init__(self, request, *args, **kwargs):
@@ -227,4 +227,3 @@ class ForgetPasswordForm(BootStrapForm, forms.Form):
 
         if code.strip() != str_code:
             raise ValidationError('验证码错误,请重新输入')
-

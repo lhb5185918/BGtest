@@ -76,3 +76,14 @@ class ProjectUser(models.Model):  # 项目参与者
     star = models.BooleanField(default=False, verbose_name='星标')
     # invitee = models.ForeignKey(to='UserInfo', verbose_name='邀请者', related_name='invitee')  # @related_name表示反向查询名
     create_datetime = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+
+class Wiki(models.Model):
+    project = models.ForeignKey(to='Project', verbose_name='项目', on_delete=models.CASCADE)
+    title = models.CharField(max_length=32, verbose_name='标题')
+    content = models.TextField(verbose_name='内容')
+    parent = models.ForeignKey(to='Wiki', verbose_name='父文章', null=True, blank=True, on_delete=models.CASCADE, related_name='children')
+    depth = models.IntegerField(verbose_name='深度', default=1)   # @depth表示深度,默认为1，对应一级标题
+
+    def __str__(self):
+        return self.title

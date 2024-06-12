@@ -1,9 +1,10 @@
+{% load static %}
+{% load project %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock %}</title>
-    {% load static %}
     <link rel="stylesheet" href="{% static  'plugin/bootstrap/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static  'plugin/font-awesome/css/font-awesome.min.css ' %}">
     <link rel="stylesheet" href="{% static  'plugin/bootstrap/css/toastr.css' %}">
@@ -34,24 +35,16 @@
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
+            {#        利用inclusion_tag标签#}
+            {% all_project_list request %}
+            {% if request.project %}
                 <ul class="nav navbar-nav">
-                <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">项目 <span class="caret"></span></a>
-                  <ul class="dropdown-menu active" >
-                    <li><a href="#">项目</a></li>
-                    <li><a href="#">Another action</a></li>
-                    <li><a href="#">Something else here</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li><a href="#">Separated link</a></li>
-                    <li role="separator" class="divider"></li>
-                    <li><a href="#">One more separated link</a></li>
-                  </ul>
-                </li>
-              </ul>
-
+                    {% manage_menu_list request %}
+                </ul>
+            {% endif %}
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="#">工作台 <i class="fa fa-dashboard" aria-hidden="true" /></i> </a></li>
-                <li><a href="#">日历 <i class="fa fa-calendar-check-o" aria-hidden="true" /></i> </a></li>
+                <li><a href="#">工作台 <i class="fa fa-dashboard" aria-hidden="true"/></i> </a></li>
+                <li><a href="#">日历 <i class="fa fa-calendar-check-o" aria-hidden="true"/></i> </a></li>
                 <li><a href="#">Link</a></li>
                 <li><a href="#">Link</a></li>
                 {% if request.tracer %}

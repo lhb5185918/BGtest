@@ -3,7 +3,7 @@ from web.forms.account import RegisterView
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from web.forms.account import SendSmsForm, LoginSmsForm, LoginForm, ForgetPasswordForm
-from web.models import UserInfo, PricePolicy, Transaction , Project, ProjectUser
+from web.models import UserInfo, PricePolicy, Transaction, Project, ProjectUser
 from web.util.image_code import check_code
 from django.db.models import Q
 import uuid
@@ -112,14 +112,14 @@ def logout(request):
 
 @csrf_exempt
 def forget_password(request):
-    if request.method =="GET":
+    if request.method == "GET":
         forms = ForgetPasswordForm({})
-        return render(request, "forget_password.html",{"form": forms})
+        return render(request, "forget_password.html", {"form": forms})
     else:
         forms = ForgetPasswordForm(request, data=request.POST)
         if forms.is_valid():
             phone = forms.cleaned_data.get("phone")
-            password = forms.cleaned_data.get("password")
+            password = forms.cleaned_data.get("new_password")
             user_object = UserInfo.objects.filter(phone=phone).first()
             if user_object:
                 user_object.password = password
