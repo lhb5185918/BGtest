@@ -2,7 +2,6 @@ from django.template import Library
 from web import models
 from django.urls import reverse  # 反向解析
 
-
 register = Library()
 
 
@@ -12,12 +11,13 @@ def all_project_list(request):
     my_project_list = models.Project.objects.filter(creator=request.transaction.user)
     # 获取我参与的项目
     join_project_list = models.ProjectUser.objects.filter(user=request.transaction.user)
-    return{"my": my_project_list, "join": join_project_list, "request": request}
+    return {"my": my_project_list, "join": join_project_list, "request": request}
+
 
 @register.inclusion_tag('inclusion/manage_menu_list.html')
 def manage_menu_list(request):
     datalist = [
-        {"title": "概览", "url":reverse("manage_dashboard",kwargs=({"project_id": request.project.id}))},
+        {"title": "概览", "url": reverse("manage_dashboard", kwargs=({"project_id": request.project.id}))},
         {"title": "问题", "url": reverse("manage_issues", kwargs=({"project_id": request.project.id}))},
         {"title": "统计", "url": reverse("manage_statistics", kwargs=({"project_id": request.project.id}))},
         {"title": "wiki", "url": reverse("manage_wiki", kwargs=({"project_id": request.project.id}))},

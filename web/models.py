@@ -1,5 +1,6 @@
 from django.db import models
 
+
 # Create your models here.
 
 
@@ -42,7 +43,8 @@ class Transaction(models.Model):  # 交易记录
     status = models.SmallIntegerField(choices=status_choice, verbose_name='状态')
     order = models.CharField(max_length=64, unique=True, verbose_name='订单号')  # @unique=True表示唯一 唯一索引，查询速度较快
     user = models.ForeignKey(to='UserInfo', verbose_name='用户', on_delete=models.CASCADE)  # @ForeignKey表示外键
-    price_policy = models.ForeignKey(to='PricePolicy', verbose_name='价格策略', on_delete=models.CASCADE)  # @ForeignKey表示外键
+    price_policy = models.ForeignKey(to='PricePolicy', verbose_name='价格策略',
+                                     on_delete=models.CASCADE)  # @ForeignKey表示外键
     count = models.IntegerField(verbose_name='数量（年）', help_text='0表示无限期')
     price = models.IntegerField(verbose_name='实际支付价格')
     start_datetime = models.DateTimeField(verbose_name='开始时间', null=True, blank=True)
@@ -62,12 +64,14 @@ class Project(models.Model):  # 项目表
     name = models.CharField(max_length=32, verbose_name='项目名')
     color = models.CharField(max_length=32, verbose_name='颜色', choices=color_choice, default=1)
     # @color_choice表示颜色选择
-    user_space = models.IntegerField(verbose_name='项目空间',default=0)
+    user_space = models.IntegerField(verbose_name='项目空间', default=0)
     desc = models.TextField(verbose_name='项目描述', null=True, blank=True)  # @null=True表示可以为空 @blank=True表示可以为空字符串
     star = models.BooleanField(default=False, verbose_name='星标')
     join_count = models.IntegerField(verbose_name='参与人数', default=1)
     creator = models.ForeignKey(to='UserInfo', verbose_name='创建者', related_name='creator', on_delete=models.CASCADE)
     create_datetime = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    bucket = models.CharField(max_length=128, verbose_name='COS桶', null=True, blank=True)
+    region = models.CharField(max_length=32, verbose_name='COS地域', null=True, blank=True)
 
 
 class ProjectUser(models.Model):  # 项目参与者
@@ -82,8 +86,9 @@ class Wiki(models.Model):
     project = models.ForeignKey(to='Project', verbose_name='项目', on_delete=models.CASCADE)
     title = models.CharField(max_length=32, verbose_name='标题')
     content = models.TextField(verbose_name='内容')
-    parent = models.ForeignKey(to='Wiki', verbose_name='父文章', null=True, blank=True, on_delete=models.CASCADE, related_name='children')
-    depth = models.IntegerField(verbose_name='深度', default=1)   # @depth表示深度,默认为1，对应一级标题
+    parent = models.ForeignKey(to='Wiki', verbose_name='父文章', null=True, blank=True, on_delete=models.CASCADE,
+                               related_name='children')
+    depth = models.IntegerField(verbose_name='深度', default=1)  # @depth表示深度,默认为1，对应一级标题
 
     def __str__(self):
         return self.title

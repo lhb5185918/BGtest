@@ -1,4 +1,5 @@
 import hashlib
+import uuid
 from django.conf import settings
 
 
@@ -8,3 +9,7 @@ def md5(string):
     hash_object.update(string.encode('utf-8'))
     return hash_object.hexdigest()
 
+
+def uid(string):
+    data = "{}-{}".format(str(uuid.uuid4()), string)
+    return md5(data)

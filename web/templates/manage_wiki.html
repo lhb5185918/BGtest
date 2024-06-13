@@ -1,7 +1,8 @@
 {% extends "layout/manage.html" %}
-
+{% load static %}
 
 {% block css %}
+    <link rel="stylesheet" href="{% static "plugin/markdown/css/editormd.preview.min.css" %}">
     <style>
         .panel-default {
             margin-top: 10px;
@@ -55,6 +56,16 @@
                        href="{% url "wiki_add" project_id=request.project.id %}">
                         <i class="fa fa-plus-circle " aria-hidden="true"></i> 新建文档
                     </a>
+                    {% if wiki_object %}
+                        <a type="button" class="btn btn-warning btn-xs"
+                           href="{% url "wiki_edit" project_id=request.project.id wiki_id=wiki_object.id %}">
+                            <i class="fa fa-plus-circle " aria-hidden="true"></i> 编辑文档
+                        </a>
+                        <a type="button" class="btn btn-danger btn-xs"
+                           href="{% url "wiki_delete" project_id=request.project.id wiki_id=wiki_object.id %}">
+                            <i class="fa fa-plus-circle " aria-hidden="true"></i> 删除文档
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -65,7 +76,9 @@
             </div>
             <div class="col-sm-9 content">
                 {% if wiki_object %}
-                    {{ wiki_object.content }}
+                    <div id="previewMarkdown">
+                        <textarea>{{ wiki_object.content }}</textarea>
+                    </div>.
                 {% else %}
                     <div style="text-align: center; margin-top: 50px ">
                         <h4>《{{ request.project.name }}》wiki文档库</h4>
@@ -83,13 +96,33 @@
 {% endblock %}
 
 {% block js %}
+    <script src="{% static "plugin/markdown/editormd.min.js" %}"></script>
+    <script src="{% static "plugin/markdown/lib/jquery.flowchart.min.js" %}"></script>
+    <script src="{% static "plugin/markdown/lib/flowchart.min.js" %}"></script>
+    <script src="{% static "plugin/markdown/lib/marked.min.js" %}"></script>
+    <script src="{% static "plugin/markdown/lib/prettify.min.js" %}"></script>
+    <script src="{% static "plugin/markdown/lib/raphael.min.js" %}"></script>
+    <script src="{% static "plugin/markdown/lib/sequence-diagram.min.js" %}"></script>
+    <script src="{% static "plugin/markdown/lib/underscore.min.js" %}"></script>
     <script>
         // 生成wiki地址
         let WIKI_DETAIL_URL = "{% url "manage_wiki" project_id=request.project.id %}"
         $(function () {
                 initCatalog();
+                initpreviewMarkdown();
             }
         );
+
+        function initpreviewMarkdown() {
+            editormd.markdownToHTML("previewMarkdown", {
+                htmlDecode: "style,script,iframe",  // you can filter tags decode
+                emoji: true,
+                taskList: true,
+                tex: true,  // 默认不解析
+                flowChart: true,  // 默认不解析
+                sequenceDiagram: true  // 默认不解析
+            });
+        }
 
         function initCatalog() {
             $.ajax({

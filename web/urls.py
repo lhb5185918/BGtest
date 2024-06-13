@@ -59,5 +59,8 @@ urlpatterns = [
         path('setting/', manage.manage_setting, name='manage_setting'),
         path('wiki/add/', wiki.wiki_add, name='wiki_add'),
         path('wiki/catalog/', wiki.wiki_catalog, name='wiki_catalog'),
+        path(r'wiki/delete/(?p<wiki_id>\d+)', wiki.wiki_delete, name='wiki_delete'),
+        path(r'wiki/edit/(?p<wiki_id>\d+)', wiki.wiki_edit, name='wiki_edit'),
+        path('wiki/upload/', wiki.wiki_upload, name='wiki_upload'),
     ]))  # include可以读取字符串，指定文件路径，也可以读取列表中的元组，指定多个文件路径
 ]

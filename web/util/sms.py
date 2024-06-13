@@ -4,8 +4,6 @@ from aliyunsdkcore.request import CommonRequest
 
 
 def send_sms(phone, sms_code, code):
-
-
     client = AcsClient(access_key_id, access_key_secret, 'cn-hangzhou')
     template_param = {"code": code}
     request = CommonRequest()

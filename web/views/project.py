@@ -8,6 +8,8 @@ from web.util.image_code import check_code
 from django.db.models import Q
 from web.forms.project import ProjectModelForm
 from web.models import Project, ProjectUser
+from web.util.cos import create_bucket
+import time
 
 
 @csrf_exempt
@@ -31,7 +33,14 @@ def project_list(request):
     else:
         forms = ProjectModelForm(request, data=request.POST)
         if forms.is_valid():
+            projectname = forms.cleaned_data['name']
+            # 为项目创建COS存储桶，和区域
+            bucket = f"{request.tracer.phone}{str(int(time.time()))}-1304179902"
+            region = "ap-nanjing"
+            create_bucket(bucket, region)
             forms.instance.creator = request.transaction.user  # 获取当前用户
+            forms.instance.bucket = bucket
+            forms.instance.region = region
             forms.save()
             return JsonResponse({"status": True, "msg": "创建成功"})
             # return redirect('/project/list/')

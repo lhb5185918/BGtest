@@ -173,3 +173,4 @@ LOGIN_WHITE_URL_LIST = [
     '/send_sms/',
     '/forget/',
 ]
+X_FRAME_OPTIONS = 'ALLOW-FROM https://example.com/'
