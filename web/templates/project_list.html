@@ -7,14 +7,14 @@
         }
 
         .container-fluid.project {
-    margin-bottom: 20px; /* 在 "新建项目" 下方添加 20px 的边距 */
-}
+            margin-bottom: 20px; /* 在 "新建项目" 下方添加 20px 的边距 */
+        }
 
         .error-msg {
             color: red;
         }
 
-         .panel-body {
+        .panel-body {
             padding: 0;
             display: flex;
             flex-direction: row;
@@ -29,7 +29,8 @@
             right: 50% !important;
             transform: translate(50%, -50%);
         }
- .panel-body > .item {
+
+        .panel-body > .item {
             border-radius: 6px;
             width: 228px;
             border: 1px solid #dddddd;
@@ -88,7 +89,7 @@
             width: 25px;
             height: 25px;
             border-radius: 50%;
-            border:2px #dddddd;
+            border: 2px #dddddd;
         }
 
         .color-radio input[type= "radio"]:checked + .cycle {
@@ -101,7 +102,7 @@
 
 
 {% block content %}
-        <div class="container-fluid project">
+    <div class="container-fluid project">
 
         <a class='btn btn-primary' data-toggle="modal" data-target="#addModel"><i class="fa fa-arrows"
                                                                                   aria-hidden="true"/></i> 新建项目</a>
@@ -109,7 +110,9 @@
     </div>
 
     <div class="panel panel-default">
-        <div class="panel-heading"><i class="fa fa-star" aria-hidden="true" style="background-color: chocolate"></i> 重点项目</div>
+        <div class="panel-heading"><i class="fa fa-star" aria-hidden="true" style="background-color: chocolate"></i>
+            重点项目
+        </div>
         <div class="panel-body">
             {% for item in project_dict.star %}
                 <div class="item">
@@ -162,7 +165,8 @@
         <div class="panel-body">
             {% for item in project_dict.join %}
                 <div class="item">
-                <a href="{% url "manage_dashboard" project_id=item.id %}" class="title" style="background-color: {{ item.get_color_display }}">{{ item.name }}</a>
+                <a href="{% url "manage_dashboard" project_id=item.id %}" class="title"
+                   style="background-color: {{ item.get_color_display }}">{{ item.name }}</a>
                 <div class="info">
                     <div>
                         <a href="{% url 'project_star' 'join' item.id %}">

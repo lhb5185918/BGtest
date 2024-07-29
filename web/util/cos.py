@@ -21,7 +21,8 @@ def create_bucket(bucket, region="ap-nanjing"):
 
 
 def upload_file(bucket, region, file_obj, key):
-
+    secret_id = ''
+    secret_key = ''
     config = CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key)
     client = CosS3Client(config)
     response = client.upload_file_from_buffer(
