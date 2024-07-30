@@ -52,20 +52,3 @@ def check_code(width=120, height=30, char_length=5, font_file='Monaco.ttf', font
     img = img.filter(ImageFilter.EDGE_ENHANCE_MORE)
     return img, ''.join(code)
 
-#
-# if __name__ == '__main__':
-#     img, code = check_code()
-#     # img.show()
-#
-#     # 2. 写入文件
-#     # img,code = check_code()
-#     # with open('code.png', 'wb') as f:
-#     #     img.save(f, format='png')
-#
-#
-#     from io import BytesIO
-#     stream = BytesIO()
-#     img.save(stream, 'png')
-#     stream.getvalue()
-#
-#     pass

@@ -36,7 +36,7 @@ from web.views import account, home, project, manage, wiki
 
 from django.contrib import admin
 from django.urls import path, include, re_path
-from web.views import account, home, project, manage, wiki
+from web.views import account, home, project, manage, wiki, file
 
 urlpatterns = [
     path('register/', account.register, name='register'),
@@ -49,7 +49,8 @@ urlpatterns = [
     path('project/list/', project.project_list, name='project_list'),
     path('forget/', account.forget_password, name='forget_password'),
     re_path(r'project/star/(?P<project_type>\w+)/(?P<project_id>\d+)/', project.project_star, name='project_star'),
-    re_path(r'project/unstar/(?P<project_type>\w+)/(?P<project_id>\d+)/', project.project_unstar, name='project_unstar'),
+    re_path(r'project/unstar/(?P<project_type>\w+)/(?P<project_id>\d+)/', project.project_unstar,
+            name='project_unstar'),
     path("manage/<int:project_id>/", include([
         path('dashboard/', manage.manage_dashboard, name='manage_dashboard'),
         path('issues/', manage.manage_issues, name='manage_issues'),
@@ -62,5 +63,8 @@ urlpatterns = [
         path(r'wiki/delete/(?p<wiki_id>\d+)', wiki.wiki_delete, name='wiki_delete'),
         path(r'wiki/edit/(?p<wiki_id>\d+)', wiki.wiki_edit, name='wiki_edit'),
         path('wiki/upload/', wiki.wiki_upload, name='wiki_upload'),
+        path('file/delete', file.manage_file_delete, name='file_delete'),  # 文件删除
+        path('file/post', file.manage_file_post, name='file_post'),  # 文件上传
+        path('file/credential', file.manage_file_credential, name='file_credential'),  # 临时凭证
     ]))  # include可以读取字符串，指定文件路径，也可以读取列表中的元组，指定多个文件路径
 ]

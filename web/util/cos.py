@@ -8,6 +8,7 @@ import logging
 def create_bucket(bucket, region="ap-nanjing"):
     #  正常情况日志级别使用 INFO，需要定位时可以修改为 DEBUG，此时 SDK 会打印和服务端的通信信息
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+
     config = CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key)
     client = CosS3Client(config)
 
@@ -15,9 +16,25 @@ def create_bucket(bucket, region="ap-nanjing"):
         Bucket=bucket,
         ACL='public-read'
     )
+    cors_config = {
+        'CORSRule': [
+            {
+                'AllowedOrigin': ['*'],
+                'AllowedMethod': ['GET', 'PUT', 'POST', 'DELETE'],
+                'AllowedHeader': ['*'],
+                'ExposeHeader': ['*'],
+                'MaxAgeSeconds': 500
+            }
+        ]
+    }
+    response = client.put_bucket_cors(
+        Bucket=bucket,
+        CORSConfiguration=cors_config
+    )
 
 
 def upload_file(bucket, region, file_obj, key):
+
     config = CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key)
     client = CosS3Client(config)
     response = client.upload_file_from_buffer(
